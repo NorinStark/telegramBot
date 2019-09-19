@@ -60,7 +60,7 @@ PyYAML==3.13
 query-string==2019.4.13
 redis==3.2.1
 request==2019.4.13
-requests==2.20.1
+requests==2.22.0
 requests-oauthlib==1.2.0
 requests-toolbelt==0.9.1
 rq==1.0
@@ -76,3 +76,6 @@ wcwidth==0.1.7
 websocket-client==0.56.0
 Werkzeug==0.15.4
 wit==5.1.0
+schedule==0.6.0
+telebot==0.0.3
+pyTelegramBotAPI==3.6.6
