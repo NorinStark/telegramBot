@@ -62,10 +62,4 @@ class TelegramBot:
 
     @staticmethod
     def init_webhook(url):
-        """
-        Initializes the webhook
-        Args:
-            url:str: Provides the telegram server with a endpoint for webhook data
-        """
-
         requests.get(url)
