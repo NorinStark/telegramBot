@@ -1,23 +1,60 @@
-import telebot
+from flask import Flask, request
+import requests
+import json
+import datetime
+import pymongo
+import telegram
+from telegram.ext import Updater
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+import time
+app = Flask(__name__)
+myclient = pymongo.MongoClient("mongodb+srv://Sixsixone5:42577400Vj@chatbot-general-p2ykh.mongodb.net/test?retryWrites=true&w=majority")
 
-API_TOKEN = '869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4'
+messages = myclient["delivery"]
 
-bot = telebot.TeleBot(API_TOKEN)
+bot = telegram.Bot(token='869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4')
 
-
-# Handle '/start' and '/help'
-@bot.message_handler(commands=['help', 'start'])
-def send_welcome(message):
-    bot.reply_to(message, """\
-Hi there, I am EchoBot.
-I am here to echo your kind words back to you. Just say anything nice and I'll say the exact same thing to you!\
-""")
-
-
-# Handle all other messages with content_type 'text' (content_types defaults to ['text'])
-@bot.message_handler(func=lambda message: True)
-def echo_message(message):
-    bot.reply_to(message, message.text)
+token = '869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4'
 
 
-bot.polling()
+@app.route("/", methods=['GET'])
+def hello():
+    print('get here')
+
+
+@app.route("/", methods=['POST'])
+def webhook():
+    data = request.get_json()
+    print(data)
+
+    chat_id = data['message']['chat']['id']
+    updater = Updater(token='869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4')
+
+    dbcompanies = messages["set_company"]
+
+    try:
+        message = data['message']['text']
+        try:
+            files = {
+                "setter_id": chat_id,
+                "company_name": "Null",
+                "action": "Null",
+                "package_amount": "Null",
+                "total_amount": "Null",
+                "upload_file": "Null"
+            }
+
+            data = dbcompanies.insert_one(files)
+
+        except Exception as e:
+            print(e)
+
+        if message == '/start':
+            updater.bot.send_message(chat_id=chat_id, text="Starting message here")
+
+
+    except Exception as e:
+        print(e)
+
+if __name__ == "__main__":
+    app.run(port=80, debug=True)
