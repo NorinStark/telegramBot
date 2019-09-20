@@ -46,12 +46,11 @@ def webhook():
 
             data = dbcompanies.insert_one(files)
 
-        except Exception as e:
-            print(e)
+        except:
+            True
 
         if message == '/start':
             updater.bot.send_message(chat_id=chat_id, text="Starting message here")
-
 
     except Exception as e:
         print(e)
