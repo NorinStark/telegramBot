@@ -32,16 +32,55 @@ def webhook():
 
     dbcompanies = messages["set_company"]
 
+
+
     try:
         message = data['message']['text']
         try:
+
+            transaction = dbcompanies.find({"setter": chat_id})
+            for item in transaction:
+                if item['company_name'] == None:
+                    dbcompanies.update_one({"setter": chat_id},
+                                           {"$set": {'company_name': message}})
+
+                    updater.bot.send_message(chat_id=chat_id, text="Please select your Company:")
+                    return "200"
+
+                elif item["action"] == None:
+                    dbcompanies.update_one({"setter": chat_id},
+                                           {"$set": {'action': message}})
+
+                    updater.bot.send_message(chat_id=chat_id, text="What do you want to do?")
+                    return "200"
+
+                elif item["package_amount"] == None:
+                    dbcompanies.update_one({"setter": chat_id},
+                                           {"$set": {'package_amount': message}})
+
+                    updater.bot.send_message(chat_id=chat_id, text="How many packages in total?")
+                    return "200"
+
+                elif item["total_amount"] == None:
+                    dbcompanies.update_one({"setter": chat_id},
+                                           {"$set": {'total_amount': message}})
+
+                    updater.bot.send_message(chat_id=chat_id, text="How much in total?")
+                    return "200"
+
+                elif item["upload_file"] == None:
+                    dbcompanies.update_one({"setter": chat_id},
+                                           {"$set": {'upload_file': message}})
+
+                    updater.bot.send_message(chat_id=chat_id, text="Would you like to upload invoice?")
+
             files = {
                 "setter_id": chat_id,
-                "company_name": "Null",
-                "action": "Null",
-                "package_amount": "Null",
-                "total_amount": "Null",
-                "upload_file": "Null"
+                "company_name": None,
+                "action": None,
+                "package_amount": None,
+                "total_amount": None,
+                "upload_file": None
             }
 
             data = dbcompanies.insert_one(files)
@@ -51,6 +90,26 @@ def webhook():
 
         if message == '/start':
             updater.bot.send_message(chat_id=chat_id, text="Starting message here")
+
+        elif message[8:] == '/company' or message[:11] == '/setcompany':
+            try:
+                if message[:8] == '/company':
+                    name = data['message']['text'][8:]
+                elif message[:11] == '/setcompany':
+                    name = data['message']['text'][11:]
+
+                CompanyName = name
+                if CompanyName == '':
+                    allcompanies = [
+                        [KeyboardButton(text="/company BlocX"), KeyboardButton(text="/company Nham24"),
+                         KeyboardButton(text="/company Joonaak"), KeyboardButton(text="/company Sousdey")]]
+
+                    myreply = ReplyKeyboardMarkup(allcompanies, one_time_keyboard=True)
+                    updater.bot.send_message(chat_id=chat_id, text="Please Select your Company:", reply_markup=myreply)
+
+            except Exception as e:
+                print(e)
+
 
     except Exception as e:
         print(e)
