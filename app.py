@@ -55,5 +55,7 @@ def webhook():
     except Exception as e:
         print(e)
 
+    return "200"
+
 if __name__ == "__main__":
     app.run(port=80, debug=True)
