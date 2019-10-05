@@ -1,20 +1,30 @@
 from flask import Flask, request
+import logging
 import requests
 import json
-import datetime
-import pymongo
-import telegram
-from telegram.ext import Updater
-from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import *
+from telegram.ext import *
+from pymongo import MongoClient
+from pymongo.errors import WriteError
+from pymongo.errors import WriteConcernError
+from datetime import datetime
 import time
+
+
 app = Flask(__name__)
-myclient = pymongo.MongoClient("mongodb+srv://Sixsixone5:42577400Vj@chatbot-general-p2ykh.mongodb.net/test?retryWrites=true&w=majority")
 
-messages = myclient["delivery"]
+myclient = MongoClient("mongodb+srv://Sixsixone5:42577400Vj@chatbot-general-p2ykh.mongodb.net/test?retryWrites=true&w=majority")
 
-bot = telegram.Bot(token='869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4')
+messages = myclient.get_default_database()
+
+#Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 token = '869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4'
+
+
 
 
 @app.route("/", methods=['GET'])
@@ -31,8 +41,6 @@ def webhook():
     updater = Updater(token='869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4')
 
     dbcompanies = messages["set_company"]
-
-
 
     try:
         message = data['message']['text']
@@ -73,6 +81,7 @@ def webhook():
                                            {"$set": {'upload_file': message}})
 
                     updater.bot.send_message(chat_id=chat_id, text="Would you like to upload invoice?")
+                    return "200"
 
             files = {
                 "setter_id": chat_id,
@@ -110,11 +119,61 @@ def webhook():
             except Exception as e:
                 print(e)
 
+        elif message[7:] == '/action' or message[:10] == '/setaction':
+            try:
+                if message[7:] == '/action':
+                    action = data['message']['text'][7:]
+                elif message[:10] == '/setaction':
+                    action = data['message']['text'][:10]
 
-    except Exception as e:
-        print(e)
+                option = action
+                if option == '':
+                    alloptions = [KeyboardButton(text="/Return"), KeyboardButton(text="/Payment")]
+
+                    myreply = ReplyKeyboardMarkup(alloptions, one_time_keyboard=True)
+                    updater.bot.send_message(chat_id=chat_id, text="What do you want to do?", reply_markup=myreply)
+
+            except Exception as e:
+                print(e)
+
+        elif message[9:] == '/packages':
+            try:
+                if message[9:] == '/packages':
+                    package = data['message']['text'][9:]
+
+                total_packages = package
+                if total_packages == '':
+                    updater.bot.send_message(chat_id=chat_id, text="How many packages in total?")
+
+            except Exception as e:
+                print(e)
+
+        elif message[7:] == '/amount':
+            try:
+                if message[7:] == '/amount':
+                    amount = data['message']['text'][7:]
+
+                total_amount = amount
+                if total_amount == '':
+                    updater.bot.send_message(chat_id=chat_id, text="How much is total amount?")
+            except Exception as e:
+                print(e)
+
+    except:
+        try:
+            message = data['message']['photo']
+            dbcol = messages['set_company']
+            dbinputs = messages['inputs']
+
+        if file_id = data['message']['photo'][0][]:
+
+
+        except Exception as e:
+            print(e)
 
     return "200"
+
+
 
 if __name__ == "__main__":
     app.run(port=80, debug=True)
