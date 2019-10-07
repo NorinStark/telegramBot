@@ -14,12 +14,10 @@ import time
 
 mongolab_uri = "mongodb+srv://Sixsixone5:42577400Vj@chatbot-general-p2ykh.mongodb.net/test?retryWrites=true&w=majority"
 
-client = MongoClient(mongolab_uri,
-                     connectTimeoutMS=10000,
-                     socketTimeoutMS=None,
-                     socketKeepAlive=True)
+client = MongoClient(mongolab_uri, connectTimeoutMS=10000, socketTimeoutMS=None, socketKeepAlive=True)
 
-db = client.get_default_database()
+db = client["delivery"]
+collection = db["set_company"]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -120,6 +118,62 @@ def handlePhoto(update, context):
     print(r)
     fileImg=json.loads(r.text)["url"]
     print(fileImg)
-    currentUser=update.message.from_user
+
+    currentUser=update.message.from_user.id
     now = datetime.now()
     s2 = now.strftime("%d/%m/%Y")
+
+    user = collection.find({"setter_id":currentUser})
+
+
+
+def setCompany(update, context):
+    print("company")
+    ALL_COMPANY_NAME=["BlocX", "Joonak", "Nham24", "Cambodia Express"]
+
+    if len(context.args)==0:
+        return 0
+    companyName=context.args[0]
+    try:
+        currentUser=update.message.chat_id
+        msgToSend="Company set!"
+        print(companyName)
+
+        collection.update({"setter_id": currentUser}, {"$set":{"company_name":companyName, "setter_id":currentUser}},upsert=True)
+        update.message.reply_text(msgToSend)
+
+    except:
+        print("Company Not Found")
+        return 0
+
+def setCompanyButton(update, context):
+
+    allcompanies=[
+        [KeyboardButton(text="/company BlocX"), KeyboardButton(text="/company Joonak")],
+        [KeyboardButton(text="/company Nham24"), KeyboardButton(text="/company Cambodia Express")]]
+    myreply = ReplyKeyboardMarkup(allcompanies, one_time_keyboard=True)
+    update.message.reply_text('Please choose:', reply_markup=myreply)
+
+def main():
+
+    updater = Updater("869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4", use_context=True)
+
+    dp = updater.dispatcher
+
+    img_handler = MessageHandler(Filters.photo, handlePhoto)
+    dp.add_handler(img_handler)
+
+    com_handler = CommandHandler('company', setCompany)
+    dp.add_handler(com_handler)
+
+    com_handlerB = CommandHandler('setcompany', setCompanyButton)
+    dp.add_handler(com_handlerB)
+
+    dp.add_error_handler(error)
+
+    updater.start_polling()
+
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
