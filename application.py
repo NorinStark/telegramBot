@@ -120,11 +120,10 @@ def handlePhoto(update, context):
     print(fileImg)
 
     currentUser=update.message.from_user.id
-    now = datetime.now()
-    s2 = now.strftime("%d/%m/%Y")
+    msgTosend = "Image saved!"
 
-    user = collection.find({"setter_id":currentUser})
-
+    collection.update({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id":currentUser}},upsert=True)
+    update.message.reply_text(msgTosend)
 
 
 def setCompany(update, context):
