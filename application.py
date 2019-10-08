@@ -14,7 +14,8 @@ import time
 
 mongolab_uri = "mongodb+srv://Sixsixone5:42577400Vj@chatbot-general-p2ykh.mongodb.net/test?retryWrites=true&w=majority"
 
-client = MongoClient(mongolab_uri, connectTimeoutMS=10000, socketTimeoutMS=None, socketKeepAlive=True)
+client = MongoClient(mongolab_uri)
+# ,connectTimeoutMS=10000, socketTimeoutMS=None, socketKeepAlive=True
 
 db = client["delivery"]
 collection = db["set_company"]
@@ -30,7 +31,7 @@ def start(update, context):
     reply_keyboard = [['BlocX', 'Joonak', 'Nham24', 'Cambodia Express']]
 
     update.message.reply_text(
-        'Welcome to SOUSDEY CAMBODIA Bot!'
+        'Welcome to SOUSDEY CAMBODIA Bot! '
         'Send /cancel to stop talking to the bot.\n\n'
         'What is your company?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
@@ -159,14 +160,29 @@ def main():
 
     dp = updater.dispatcher
 
-    img_handler = MessageHandler(Filters.photo, handlePhoto)
-    dp.add_handler(img_handler)
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('Start', start)],
+        states={
+            COMPANY: [MessageHandler(Filters.regex('^(BlocX|Joonak|Nham24|Cambodia Express)$'), company)],
+            ACTION: [MessageHandler(Filters.regex('^(PICK UP|RETURN|PAYMENT)$'), action)],
+            PACKAGES: [MessageHandler(Filters.text, package)],
+            AMOUNT: [MessageHandler(Filters.text, amount)],
+            PHOTO: [MessageHandler(Filters.photo, photo),
+                    CommandHandler('skip', skip_photo)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )
+
+    dp.add_handler(conv_handler)
 
     com_handler = CommandHandler('company', setCompany)
     dp.add_handler(com_handler)
 
     com_handlerB = CommandHandler('setcompany', setCompanyButton)
     dp.add_handler(com_handlerB)
+
+    img_handler = MessageHandler(Filters.photo, handlePhoto)
+    dp.add_handler(img_handler)
 
     dp.add_error_handler(error)
 
