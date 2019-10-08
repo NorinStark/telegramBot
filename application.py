@@ -44,6 +44,11 @@ def company(update, context):
     user = update.message.from_user
     logger.info("Company of %s: %s", user.first_name, update.message.text)
     genre=update.message.text
+    print(genre)
+    currentUser = update.message.from_user.id
+    print(currentUser)
+
+    collection.update_one({"setter_id": currentUser}, {"$set": {"company": genre, "setter_id": currentUser}}, upsert=True)
     update.message.reply_text(
         'What do you want to do?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
@@ -53,6 +58,11 @@ def company(update, context):
 def action(update, context):
     user = update.message.from_user
     logger.info("Goal of %s: %s", user.first_name, update.message.text)
+    genre = update.message.text
+    print(genre)
+    currentUser = update.message.from_user.id
+    print(currentUser)
+    collection.update_one({"setter_id": currentUser}, {"$set": {"action": genre, "setter_id": currentUser}}, upsert=True)
     update.message.reply_text(
         'How many Packages in total?',
         reply_markup=ReplyKeyboardRemove())
@@ -62,6 +72,11 @@ def action(update, context):
 def package(update, context):
     user = update.message.from_user
     logger.info("%s have %s packages in total", user.first_name, update.message.text)
+    genre = update.message.text
+    print(genre)
+    currentUser = update.message.from_user.id
+    print(currentUser)
+    collection.update_one({"setter_id": currentUser}, {"$set": {"package_amount": genre, "setter_id": currentUser}}, upsert=True)
     update.message.reply_text(
         'What is the total amount?',
         reply_markup=ReplyKeyboardRemove())
@@ -71,18 +86,32 @@ def package(update, context):
 def amount(update, context):
     user = update.message.from_user
     logger.info("Amount of %s: %s", user.first_name, update.message.text)
+    genre = update.message.text
+    print(genre)
+    currentUser = update.message.from_user.id
+    print(currentUser)
+    collection.update_one({"setter_id": currentUser}, {"$set": {"total_amount": genre, "setter_id": currentUser}}, upsert=True)
     update.message.reply_text(
-        'Would you like to send the invoice?'
+        'Would you like to send the invoice? '
         'or send /skip if you don\'t want to.',
         reply_markup=ReplyKeyboardRemove())
 
     return PHOTO
 
 def photo(update, context):
-    user = update.message.from_user
-    photo_file = update.message.photo[-1].get_file()
-    photo_file.download('user_photo.jpg')
-    logger.info("photo of %s: %s", user.first_name, 'user_photo.jpg')
+    fileImg1 = context.bot.getFile(update.message.photo[-1].file_id)['file_path']
+    # fileImg = clientF.upload(external_url=fileImg1) A9pFKleJFTD2XjjiccHxBz
+    urlF = "https://www.filestackapi.com/api/store/S3?key=A9pFKleJFTD2XjjiccHxBz"
+    r = requests.post(urlF, data={'url': fileImg1})
+    print(r)
+    fileImg = json.loads(r.text)["url"]
+    print(fileImg)
+
+    currentUser = update.message.from_user
+    print(currentUser)
+
+    # collection.update_one({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id": currentUser}}, upsert=True)
+
     update.message.reply_text(
         'Thank you! Information is saved!',
         reply_markup=ReplyKeyboardRemove())
@@ -111,20 +140,20 @@ def error(update, context):
     # Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
-def handlePhoto(update, context):
-    fileImg1 = context.bot.getFile(update.message.photo[-1].file_id)['file_path']
-    # fileImg = clientF.upload(external_url=fileImg1) A9pFKleJFTD2XjjiccHxBz
-    urlF = "https://www.filestackapi.com/api/store/S3?key=A9pFKleJFTD2XjjiccHxBz"
-    r = requests.post(urlF, data={'url': fileImg1})
-    print(r)
-    fileImg=json.loads(r.text)["url"]
-    print(fileImg)
-
-    currentUser=update.message.from_user.id
-    msgTosend = "Image saved!"
-
-    collection.update({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id":currentUser}},upsert=True)
-    update.message.reply_text(msgTosend)
+# def handlePhoto(update, context):
+#     fileImg1 = context.bot.getFile(update.message.photo[-1].file_id)['file_path']
+#     # fileImg = clientF.upload(external_url=fileImg1) A9pFKleJFTD2XjjiccHxBz
+#     urlF = "https://www.filestackapi.com/api/store/S3?key=A9pFKleJFTD2XjjiccHxBz"
+#     r = requests.post(urlF, data={'url': fileImg1})
+#     print(r)
+#     fileImg=json.loads(r.text)["url"]
+#     print(fileImg)
+#
+#     currentUser=update.message.from_user.id
+#     msgTosend = "Image saved!"
+#
+#     collection.update({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id":currentUser}},upsert=True)
+#     update.message.reply_text(msgTosend)
 
 
 def setCompany(update, context):
@@ -139,7 +168,7 @@ def setCompany(update, context):
         msgToSend="Company set!"
         print(companyName)
 
-        collection.update({"setter_id": currentUser}, {"$set":{"company_name":companyName, "setter_id":currentUser}},upsert=True)
+        collection.update_one({"setter_id": currentUser}, {"$set":{"company_name":companyName, "setter_id":currentUser}},upsert=True)
         update.message.reply_text(msgToSend)
 
     except:
@@ -180,9 +209,6 @@ def main():
 
     com_handlerB = CommandHandler('setcompany', setCompanyButton)
     dp.add_handler(com_handlerB)
-
-    img_handler = MessageHandler(Filters.photo, handlePhoto)
-    dp.add_handler(img_handler)
 
     dp.add_error_handler(error)
 
