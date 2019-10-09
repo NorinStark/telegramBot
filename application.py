@@ -18,7 +18,7 @@ client = MongoClient(mongolab_uri)
 # ,connectTimeoutMS=10000, socketTimeoutMS=None, socketKeepAlive=True
 
 db = client["delivery"]
-collection = db["set_company"]
+dbcompanies = db["set_company"]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -29,9 +29,26 @@ COMPANY, ACTION, PACKAGES, AMOUNT, PHOTO = range(5)
 genre=""
 def start(update, context):
     reply_keyboard = [['BlocX', 'Joonak', 'Nham24', 'Cambodia Express']]
+    user_id = update.message.from_user.id
+
+    try:
+        info = {
+            "setter_id": user_id,
+            "company_name": None,
+            "action": None,
+            "package_amount": None,
+            "total_amount": None,
+            "upload_file": None,
+            "time": None
+        }
+
+        data = dbcompanies.insert_one(info)
+        print(data)
+    except Exception as e:
+        print(e)
 
     update.message.reply_text(
-        'Welcome to SOUSDEY CAMBODIA Bot! '
+        'Welcome to SOUSDEY CAMBODIA Bot!\n'
         'Send /cancel to stop talking to the bot.\n\n'
         'What is your company?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
@@ -48,7 +65,11 @@ def company(update, context):
     currentUser = update.message.from_user.id
     print(currentUser)
 
-    collection.update_one({"setter_id": currentUser}, {"$set": {"company": genre, "setter_id": currentUser}}, upsert=True)
+    try:
+        dbcompanies.update_one({"setter_id": currentUser}, {"$set": {"company": genre, "setter_id": currentUser}}, upsert=True)
+    except Exception as e:
+        print(e)
+
     update.message.reply_text(
         'What do you want to do?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
@@ -62,7 +83,12 @@ def action(update, context):
     print(genre)
     currentUser = update.message.from_user.id
     print(currentUser)
-    collection.update_one({"setter_id": currentUser}, {"$set": {"action": genre, "setter_id": currentUser}}, upsert=True)
+
+    try:
+        dbcompanies.update_one({"setter_id": currentUser}, {"$set": {"action": genre, "setter_id": currentUser}}, upsert=True)
+    except Exception as e:
+        print(e)
+
     update.message.reply_text(
         'How many Packages in total?',
         reply_markup=ReplyKeyboardRemove())
@@ -76,7 +102,12 @@ def package(update, context):
     print(genre)
     currentUser = update.message.from_user.id
     print(currentUser)
-    collection.update_one({"setter_id": currentUser}, {"$set": {"package_amount": genre, "setter_id": currentUser}}, upsert=True)
+
+    try:
+        dbcompanies.update_one({"setter_id": currentUser}, {"$set": {"package_amount": genre, "setter_id": currentUser}}, upsert=True)
+    except Exception as e:
+        print(e)
+
     update.message.reply_text(
         'What is the total amount?',
         reply_markup=ReplyKeyboardRemove())
@@ -90,9 +121,14 @@ def amount(update, context):
     print(genre)
     currentUser = update.message.from_user.id
     print(currentUser)
-    collection.update_one({"setter_id": currentUser}, {"$set": {"total_amount": genre, "setter_id": currentUser}}, upsert=True)
+
+    try:
+        dbcompanies.update_one({"setter_id": currentUser}, {"$set": {"total_amount": genre, "setter_id": currentUser}}, upsert=True)
+    except Exception as e:
+        print(e)
+
     update.message.reply_text(
-        'Would you like to send the invoice? '
+        'Would you like to send the invoice?\n'
         'or send /skip if you don\'t want to.',
         reply_markup=ReplyKeyboardRemove())
 
@@ -110,7 +146,10 @@ def photo(update, context):
     currentUser = update.message.from_user
     print(currentUser)
 
-    # collection.update_one({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id": currentUser}}, upsert=True)
+    try:
+        dbcompanies.update_one({"setter_id": currentUser}, {"$set": {"upload_file": fileImg, "setter_id": currentUser}}, upsert=True)
+    except Exception as e:
+        print(e)
 
     update.message.reply_text(
         'Thank you! Information is saved!',
@@ -168,7 +207,7 @@ def setCompany(update, context):
         msgToSend="Company set!"
         print(companyName)
 
-        collection.update_one({"setter_id": currentUser}, {"$set":{"company_name":companyName, "setter_id":currentUser}},upsert=True)
+        # collection.update_one({"setter_id": currentUser}, {"$set":{"company_name":companyName, "setter_id":currentUser}},upsert=True)
         update.message.reply_text(msgToSend)
 
     except:
@@ -185,7 +224,7 @@ def setCompanyButton(update, context):
 
 def main():
 
-    updater = Updater("869700453:AAFYPaaF_zCeIocVcdYiDNCLp4PkcpJi7t4", use_context=True)
+    updater = Updater("875405539:AAHIU79hLMeXssv5oGiyXIzjnNPrUyX45P4", use_context=True)
 
     dp = updater.dispatcher
 
