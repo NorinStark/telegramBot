@@ -36,7 +36,7 @@ httplib2==0.12.1
 idna==2.7
 invoke==1.2.0
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 jmespath==0.9.4
 jsonschema==2.6.0
 MarkupSafe==1.1.1
