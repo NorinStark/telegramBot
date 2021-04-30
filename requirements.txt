@@ -64,7 +64,7 @@ requests==2.22.0
 requests-oauthlib==1.2.0
 requests-toolbelt==0.9.1
 rq==1.0
-rsa==4.0
+rsa==4.7
 s3transfer==0.2.0
 semantic-version==2.5.0
 six==1.11.0
